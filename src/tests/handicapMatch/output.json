@@ -1,0 +1,11 @@
+{
+	"team1": "Лепченко В",
+	"team2": "Павлова К",
+	"outcome": {
+		"type": "handicap",
+		"period": "match",
+		"player": 2,
+		"handicap": "+5.5"
+	},
+	"rate": 2.07
+}

@@ -1,0 +1,11 @@
+{
+  "team1": "Лепченко В",
+  "team2": "Павлова К",
+  "outcome": {
+    "type": "win",
+    "period": "set",
+    "player": 2,
+    "set": "1"
+  },
+  "rate": 3.95
+}
