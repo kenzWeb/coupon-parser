@@ -5,7 +5,7 @@
 		"type": "handicap",
 		"period": "match",
 		"player": 2,
-		"handicap": "+5.5"
+		"count": 5.5
 	},
 	"rate": 2.07
 }

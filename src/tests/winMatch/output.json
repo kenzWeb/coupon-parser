@@ -1,10 +1,10 @@
 {
-	"team1": "Лепченко В",
-	"team2": "Павлова К",
-	"outcome": {
-		"type": "win",
-		"period": "match",
-		"player": 1
-	},
-	"rate": 1.12
+  "team1": "Лепченко В",
+  "team2": "Павлова К",
+  "outcome": {
+    "type": "win",
+    "period": "match",
+    "player": 1
+  },
+  "rate": 1.12
 }

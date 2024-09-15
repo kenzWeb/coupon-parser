@@ -1,97 +1,146 @@
 import * as cheerio from 'cheerio'
+
 import fs from 'fs'
 
 interface Outcome {
-	type: string
+	type?: string
 	player?: number
-	period: string
+	period?: string
 	set?: string
 	over?: boolean
 	count?: number
-	handicap?: string
+	handicap?: number
+	rate?: number
+	team1?: string
+	team2?: string
+	coefficient?: string
 }
+const filePath = './src/tests/winMatchSet/input.html'
+const jsonData = parseCoupon(filePath)
 
-export interface ParsedData {
-	team1: string
-	team2: string
-	outcome: Outcome
-	rate: number
-}
+export function parseCoupon(filePath: string): Outcome {
+	const outcomeRes: Outcome = {
+		type: '',
+		period: '',
+		player: 0,
+	}
 
-export function parseCoupon(filePath: string): ParsedData {
 	const html = fs.readFileSync(filePath, 'utf-8')
+
 	const $ = cheerio.load(html)
 
-	const eventDetails = $('.group--hAXBT._event-name--jqpbC').text().trim()
-	const [team1, team2] = eventDetails.split('–').map((team) =>
-		team
-			.replace(/\d+(\.\d+)?/g, '')
-			.replace('-й сет', '')
-			.replace('(+)', '')
-			.replace('(-)', '')
-			.replace(':', '')
-			.replace(/\n/g, '')
-			.replace(/\t/g, '')
-			.replace(/\r/g, '')
-			.replace(/\s{2,}/g, ' ')
-			.trim(),
-	)
+	const eventDetails = $('.group--hAXBT._event-name--jqpbC')
+		.text()
+		.replace(/\d+(\.\d+)?/g, '')
+		.replace('-й сет', '')
+		.replace('(+)', '')
+		.replace('(-)', '')
+		.replace(':', '')
+		.replace(' ', '')
+		.replace(/\n/g, '')
+		.replace(/\t/g, '')
+		.replace(/\r/g, '')
+		.replace(/\s+/g, ' ')
+		.trim()
+
+	const teams = eventDetails.split('–').map((team) => team.trim())
+	const team1 = teams[0]
+	const team2 = teams[1]
 
 	const outcome = $('.group--hAXBT:contains("Исход:")')
 		.text()
 		.trim()
 		.replace('Исход:', '')
 		.trim()
+
 	const coefficient = $('.group--hAXBT:contains("Коэффициент:")')
 		.text()
 		.trim()
 		.replace('Коэффициент:', '')
+
 	const set = $('.group--hAXBT:not(.title--dyGko)').text().match(/\d+/)?.[0]
+
 	const count = $('.group--hAXBT:not(.title--dyGko)')
 		.text()
 		.replace(/[^\>\<]+/g, '')
 		.trim()
+
 	const param = $('.parameter--h05r6').text().trim()
 
-	const outcomeRes: Outcome = {
-		type: '',
-		period: '',
-	}
+	const notParseDetails = $('.group--hAXBT._event-name--jqpbC').text().trim()
 
-	if (outcome.includes('Поб') && !eventDetails.includes('сет')) {
+	param == '' || undefined || null ? false : true
+
+	const player = $('.group--hAXBT:contains("Исход:")')
+		.text()
+		.trim()
+		.replace('Исход:', '')
+		.replace(' ', '')
+		.replace('Поб', '')
+
+	const handicap = $('.parameter--h05r6')
+		.text()
+		.replace('+', '')
+		.replace('-', '')
+		.trim()
+
+	if (
+		outcome.includes('Поб 1') ||
+		(outcome.includes('Поб 2') && notParseDetails.length === 0)
+	) {
 		outcomeRes.type = 'win'
-		outcomeRes.player = Number(outcome.match(/\d+/)?.[0])
 		outcomeRes.period = 'match'
-	} else if (outcome.includes('сет') || eventDetails.includes('сет')) {
-		outcomeRes.type = count ? 'handicap' : 'win'
-		outcomeRes.player = Number(outcome.match(/\d+/)?.[0])
+		outcomeRes.player = Number(player)
+	} else if (
+		outcome.includes('сет') ||
+		(notParseDetails.includes('сет') && !param)
+	) {
+		outcomeRes.type = 'win'
+		outcomeRes.player = Number(player)
 		outcomeRes.period = 'set'
 		outcomeRes.set = set
-		if (count) {
-			outcomeRes.count = Number(param)
-			outcomeRes.over = count === '>'
-		}
-	} else if (outcome.includes('1') || outcome.includes('2')) {
+	} else if (
+		(outcome.includes('1') && !notParseDetails.includes('сет') && !count) ||
+		(outcome.includes('2') && !notParseDetails.includes('сет') && !count)
+	) {
 		outcomeRes.type = 'handicap'
 		outcomeRes.period = 'match'
-		outcomeRes.player = Number(outcome.match(/\d+/)?.[0])
-		if (count) {
-			outcomeRes.count = Number(param)
-			outcomeRes.over = count === '>'
-		} else {
-			outcomeRes.handicap = param
-		}
+		outcomeRes.player = Number(player)
+		outcomeRes.count = Number(handicap)
+	} else if (
+		outcome.includes('сет') ||
+		(notParseDetails.includes('сет') && !count)
+	) {
+		outcomeRes.type = 'handicap'
+		outcomeRes.period = 'set'
+		outcomeRes.player = Number(player)
+		outcomeRes.count = Number(handicap)
+		outcomeRes.set = set
+	} else if (count && !notParseDetails.includes('сет')) {
+		outcomeRes.type = 'total'
+		outcomeRes.period = 'match'
+		outcomeRes.player = Number(player) ? Number(player) : 0
+		outcomeRes.count = Number(param)
+		count === '>' ? (outcomeRes.over = true) : (outcomeRes.over = false)
+	} else if (
+		(count && outcome.includes('сет')) ||
+		notParseDetails.includes('сет')
+	) {
+		outcomeRes.type = 'total'
+		outcomeRes.period = 'set'
+		outcomeRes.player = Number(player) ? Number(player) : 0
+		outcomeRes.count = Number(param)
+		outcomeRes.set = set
+		count === '>' ? (outcomeRes.over = true) : (outcomeRes.over = false)
 	}
 
-	return {
+	const result = {
 		team1,
 		team2,
 		outcome: outcomeRes,
 		rate: Number(coefficient),
 	}
+
+	return result
 }
-
-const filePath = './src/tests/countMatch/input.html'
-const jsonData = parseCoupon(filePath)
-
 console.log(JSON.stringify(jsonData, null, 2))

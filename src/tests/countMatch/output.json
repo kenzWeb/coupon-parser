@@ -2,9 +2,9 @@
 	"team1": "Бронцетти Л",
 	"team2": "Шрамкова Р",
 	"outcome": {
-		"type": "handicap",
+		"type": "total",
 		"period": "match",
-		"player": 20,
+		"player": 0,
 		"count": 20.5,
 		"over": true
 	},

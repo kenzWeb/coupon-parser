@@ -2,11 +2,11 @@
 	"team1": "Бронцетти Л",
 	"team2": "Шрамкова Р",
 	"outcome": {
-		"type": "handicap",
+		"type": "total",
 		"period": "set",
-		"player": 9,
-		"set": "1",
+		"player": 0,
 		"count": 9.5,
+		"set": "1",
 		"over": true
 	},
 	"rate": 2.2

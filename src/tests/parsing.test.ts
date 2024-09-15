@@ -1,6 +1,20 @@
 import fs from 'fs'
 import path from 'path'
-import {parseCoupon, ParsedData} from '../parser'
+import {parseCoupon} from '../parser' // Adjust this import path as needed
+
+interface ParsedData {
+	team1: string
+	team2: string
+	outcome: {
+		type: string
+		period: string
+		player?: number
+		set?: string
+		over?: boolean
+		count?: number
+	}
+	rate: number
+}
 
 describe('Парсинг купонов', () => {
 	const testCases = [
@@ -17,12 +31,12 @@ describe('Парсинг купонов', () => {
 		{
 			name: 'total match',
 			inputFile: 'countMatch/input.html',
-			expectedOutput: 'CountMatch/output.json',
+			expectedOutput: 'countMatch/output.json',
 		},
 		{
 			name: 'total set',
 			inputFile: 'countSet/input.html',
-			expectedOutput: 'CountSet/output.json',
+			expectedOutput: 'countSet/output.json',
 		},
 		{
 			name: 'handicap match',
